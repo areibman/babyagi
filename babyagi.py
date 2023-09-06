@@ -17,7 +17,8 @@ from dotenv import load_dotenv
 # Set up agentops
 import agentops
 from agentops import AgentOpsLogger
-ao_client = agentops.AgentOps(api_key='31453e35-43d8-43e6-98f6-5753893b2f19')
+ao_client = agentops.AgentOps(
+    api_key='31453e35-43d8-43e6-98f6-5753893b2f19', tags=['babyagi', 'alex_local', 'issue_17'])
 
 logging = AgentOpsLogger.get_agentops_logger(ao_client, 'babyagi_logger')
 
@@ -199,7 +200,7 @@ class LlamaEmbeddingFunction(EmbeddingFunction):
     def __init__(self):
         return
 
-    @ao_client.record_action("embedding_function", tags={"model": LLM_MODEL})
+    @ao_client.record_action("embedding_function", tags=[LLM_MODEL])
     def __call__(self, texts: Documents) -> Embeddings:
         embeddings = []
         for t in texts:
@@ -228,7 +229,7 @@ class DefaultResultsStorage:
             embedding_function=embedding_function,
         )
 
-    @ao_client.record_action("add_result", tags={"model": LLM_MODEL})
+    @ao_client.record_action("add_result", tags=[LLM_MODEL])
     def add(self, task: Dict, result: str, result_id: str):
 
         # Break the function if LLM_MODEL starts with "human" (case-insensitive)
@@ -256,7 +257,7 @@ class DefaultResultsStorage:
                 metadatas={"task": task["task_name"], "result": result},
             )
 
-    @ao_client.record_action("query_results", tags={"model": LLM_MODEL})
+    @ao_client.record_action("query_results", tags=[LLM_MODEL])
     def query(self, query: str, top_results_num: int) -> List[dict]:
         count: int = self.collection.count()
         if count == 0:
@@ -270,7 +271,7 @@ class DefaultResultsStorage:
 
 
 # Initialize results storage
-@ao_client.record_action("initialize_results_storage_weaviate", tags={"model": LLM_MODEL})
+@ao_client.record_action("initialize_results_storage_weaviate", tags=[LLM_MODEL])
 def try_weaviate():
     WEAVIATE_URL = os.getenv("WEAVIATE_URL", "")
     WEAVIATE_USE_EMBEDDED = os.getenv(
@@ -284,7 +285,7 @@ def try_weaviate():
     return None
 
 
-@ao_client.record_action("initialize_results_storage_pinecone", tags={"model": LLM_MODEL})
+@ao_client.record_action("initialize_results_storage_pinecone", tags=[LLM_MODEL])
 def try_pinecone():
     PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "")
     if PINECONE_API_KEY and can_import("extensions.pinecone_storage"):
@@ -299,7 +300,7 @@ def try_pinecone():
     return None
 
 
-@ao_client.record_action("initialize_results_storage_chroma", tags={"model": LLM_MODEL})
+@ao_client.record_action("initialize_results_storage_chroma", tags=[LLM_MODEL])
 def use_chroma():
     print("\nUsing results storage: " +
           "\033[93m\033[1m" + "Chroma (Default)" + "\033[0m\033[0m")
@@ -316,11 +317,11 @@ class SingleTaskListStorage:
         self.tasks = deque([])
         self.task_id_counter = 0
 
-    @ao_client.record_action("append_task", tags={"model": LLM_MODEL})
+    @ao_client.record_action("append_task", tags=[LLM_MODEL])
     def append(self, task: Dict):
         self.tasks.append(task)
 
-    @ao_client.record_action("replace_tasks", tags={"model": LLM_MODEL})
+    @ao_client.record_action("replace_tasks", tags=[LLM_MODEL])
     def replace(self, tasks: List[Dict]):
         self.tasks = deque(tasks)
 
@@ -368,7 +369,7 @@ def limit_tokens_from_string(string: str, model: str, limit: int) -> str:
     return encoding.decode(encoded[:limit])
 
 
-@ao_client.record_action("openai_call", tags={"model": LLM_MODEL})
+@ao_client.record_action("openai_call", tags=[LLM_MODEL])
 def openai_call(
     prompt: str,
     model: str = LLM_MODEL,
@@ -456,7 +457,7 @@ def openai_call(
             break
 
 
-@ao_client.record_action("task_creation_agent", tags={"model": LLM_MODEL})
+@ao_client.record_action("task_creation_agent", tags=[LLM_MODEL])
 def task_creation_agent(
         objective: str, result: Dict, task_description: str, task_list: List[str]
 ):
@@ -498,7 +499,7 @@ Unless your list is empty, do not include any headers before your numbered list 
     return out
 
 
-@ao_client.record_action("task_prioritization_agent", tags={"model": LLM_MODEL})
+@ao_client.record_action("task_prioritization_agent", tags=[LLM_MODEL])
 def prioritization_agent():
     task_names = tasks_storage.get_task_names()
     bullet_string = '\n'
@@ -536,7 +537,7 @@ Do not include any headers before your ranked list or follow your list with any 
 
 
 # Execute a task based on the objective and five previous tasks
-@ao_client.record_action("execution_agent", tags={"model": LLM_MODEL})
+@ao_client.record_action("execution_agent", tags=[LLM_MODEL])
 def execution_agent(objective: str, task: str) -> str:
     """
     Executes a task based on the given objective and previous context.
@@ -563,7 +564,7 @@ def execution_agent(objective: str, task: str) -> str:
 
 
 # Get the top n completed tasks for the objective
-@ao_client.record_action("context_agent", tags={"model": LLM_MODEL})
+@ao_client.record_action("context_agent", tags=[LLM_MODEL])
 def context_agent(query: str, top_results_num: int):
     """
     Retrieves context for a given query from an index of tasks.
