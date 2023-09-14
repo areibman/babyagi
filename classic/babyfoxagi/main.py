@@ -8,6 +8,11 @@ from ongoing_tasks import ongoing_tasks
 
 app = Flask(__name__, static_folder='public/static')
 openai.api_key = os.getenv('OPENAI_API_KEY')
+ 
+
+from agentops import Client
+ao_client = Client(api_key='31453e35-43d8-43e6-98f6-5753893b2f19',
+                   tags=['babyfox', 'alex_local', 'alphabet'])
 
 
 @app.route('/')
@@ -19,7 +24,7 @@ def hello_world():
 FOREVER_CACHE_FILE = "forever_cache.ndjson"
 OVERALL_SUMMARY_FILE = "overall_summary.ndjson"
 
-
+@ao_client.record_action('get all messages')
 @app.route('/get-all-messages', methods=["GET"])
 def get_all_messages():
   try:
@@ -33,7 +38,7 @@ def get_all_messages():
   except Exception as e:
     return jsonify({"error": str(e)}), 500
 
-
+@ao_client.record_action('get latest summary')
 def get_latest_summary():
   with open(OVERALL_SUMMARY_FILE, 'r') as file:
     lines = file.readlines()
@@ -42,6 +47,7 @@ def get_latest_summary():
   return ""
 
 
+@ao_client.record_action('summarize text')
 def summarize_text(text):
   system_message = (
     "Your task is to generate a concise summary for the provided conversation, this will be fed to a separate AI call as context to generate responses for future user queries."
@@ -62,7 +68,7 @@ def summarize_text(text):
   # Extracting the content from the assistant's message
   return completion.choices[0]['message']['content'].strip()
 
-
+@ao_client.record_action('combine summaries')
 def combine_summaries(overall, latest):
   system_message = (
     "Your task is to generate a concise summary for the provided conversation, this will be fed to a separate AI call as context to generate responses for future user queries."
@@ -87,7 +93,7 @@ def combine_summaries(overall, latest):
   return completion.choices[0]['message']['content'].strip()
 
 
-
+@ao_client.record_action('openai_call')
 def openai_function_call(user_message):
   global ongoing_tasks
   global global_skill_registry
@@ -191,12 +197,12 @@ def openai_function_call(user_message):
 
   return response_data
 
-
+@ao_client.record_action('generate_task_id')
 def generate_task_id():
   """Generates a unique task ID"""
   return f"{str(len(ongoing_tasks) + 1)}"
 
-
+@ao_client.record_action('update summary')
 def update_summary(messages):
   # Combine messages to form text and summarize
   messages_text = " ".join([msg['content'] for msg in messages])
@@ -207,7 +213,7 @@ def update_summary(messages):
   combined_summary = combine_summaries(overall, latest_summary)
   append_to_ndjson(OVERALL_SUMMARY_FILE, {"summary": combined_summary})
 
-
+@ao_client.record_action('determine response')
 @app.route('/determine-response', methods=["POST"])
 def determine_response():
   try:
@@ -274,7 +280,7 @@ def check_task_status(task_id):
     print(task.get("status"))
     return jsonify({"status": task.get("status")})
 
-
+@ao_client.record_action('fetch task output')
 @app.route('/fetch-task-output/<task_id>', methods=["GET"])
 def fetch_task_output(task_id):
   print("FETCH_TASK_STATUS")
@@ -289,6 +295,7 @@ def update_ongoing_tasks_file():
     with open("ongoing_tasks.py", "w") as file:
         file.write(f"ongoing_tasks = {ongoing_tasks}\n")
 
+@ao_client.record_action('get all tasks')
 @app.route('/get-all-tasks', methods=['GET'])
 def get_all_tasks():
     tasks = []

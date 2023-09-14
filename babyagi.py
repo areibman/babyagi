@@ -15,12 +15,10 @@ import os
 from dotenv import load_dotenv
 
 # Set up agentops
-import agentops
-from agentops import AgentOpsLogger
-ao_client = agentops.AgentOps(
-    api_key='31453e35-43d8-43e6-98f6-5753893b2f19', tags=['babyagi', 'alex_local', 'issue_17'])
 
-logging = AgentOpsLogger.get_agentops_logger(ao_client, 'babyagi_logger')
+from agentops import Client
+ao_client = Client(api_key='31453e35-43d8-43e6-98f6-5753893b2f19',
+                   tags=['babyagi', 'alex_local', 'alphabet'])
 
 # Set logger
 
@@ -654,7 +652,7 @@ def main():
         else:
             print('Done.')
             loop = False
-    ao_client.end_session('Indeterminate')
+    ao_client.end_session('Success')
 
 
 if __name__ == "__main__":
