@@ -17,8 +17,8 @@ from dotenv import load_dotenv
 # Set up agentops
 
 from agentops import Client
-ao_client = Client(api_key='31453e35-43d8-43e6-98f6-5753893b2f19',
-                   tags=['babyagi', 'alex_local', 'alphabet'])
+ao_client = Client(api_key='',
+                   tags=['babyagi'])
 
 # Set logger
 
@@ -315,7 +315,7 @@ class SingleTaskListStorage:
         self.tasks = deque([])
         self.task_id_counter = 0
 
-    @ao_client.record_action("append_task", tags=[LLM_MODEL])
+    # @ao_client.record_action("append_task", tags=[LLM_MODEL])
     def append(self, task: Dict):
         self.tasks.append(task)
 
@@ -367,7 +367,7 @@ def limit_tokens_from_string(string: str, model: str, limit: int) -> str:
     return encoding.decode(encoded[:limit])
 
 
-@ao_client.record_action("openai_call", tags=[LLM_MODEL])
+@ao_client.record_action("openai_call", action_type='llm', model='gpt-3.5-turbo')
 def openai_call(
     prompt: str,
     model: str = LLM_MODEL,
