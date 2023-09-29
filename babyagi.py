@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from agentops import Client
 from chromadb.config import Settings
 import re
 from chromadb.api.types import Documents, EmbeddingFunction, Embeddings
@@ -14,16 +15,14 @@ import time
 import os
 from dotenv import load_dotenv
 
-# Set up agentops
-
-from agentops import Client
-ao_client = Client(api_key='',
-                   tags=['babyagi'])
-
-# Set logger
-
 # Load default environment variables (.env)
 load_dotenv()
+
+# Set up agentops
+
+ao_client = Client(api_key=os.environ.get('AGENTOPS_KEY'), tags=['babyagi'])
+
+# Set logger
 
 
 # default opt out of chromadb telemetry.
