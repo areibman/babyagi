@@ -366,7 +366,7 @@ def limit_tokens_from_string(string: str, model: str, limit: int) -> str:
     return encoding.decode(encoded[:limit])
 
 
-@ao_client.record_action("openai_call", action_type='llm', model='gpt-3.5-turbo')
+@ao_client.record_action("openai_call")
 def openai_call(
     prompt: str,
     model: str = LLM_MODEL,
