@@ -20,7 +20,8 @@ load_dotenv()
 
 # Set up agentops
 
-ao_client = Client(api_key=os.environ.get('AGENTOPS_KEY'), tags=['babyagi'])
+ao_client = Client(api_key=os.environ.get('AGENTOPS_API_KEY'),
+                   tags=['babyagi', 'Find agent startups'])
 
 # Set logger
 
