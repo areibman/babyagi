@@ -2,6 +2,33 @@
 Simple implementation of the AgentOps SDK. Track events, session replays, stats, and run costs with AgentOps.
 
 [Sign up with an account here to get started](http://app.agentops.ai)
+## Run BabyAGI in 1 minute:
+Set your OpenAI and AgentOps keys:
+
+```sh
+export OPENAI_API_KEY=...
+export AGENTOPS_API_KEY=...
+```
+
+Create a virtual environment and install requirements
+```sh
+python -m venv env
+source env/bin/activate
+```
+
+Create a .env file:
+```sh
+cp .env.example .env
+```
+Update .env accordingly. You should be able to run babyagi without any additional configuration, but if you want to switch out the model or set your OpenAI and AgentOps API keys, that works also. You may change the default prompt from "Solve world hunger"
+
+Finally, run babyagi
+```sh
+python babyagi.py
+```
+
+BabyAGI never terminates, so be sure to end the session.
+
 
 # Objective
 
